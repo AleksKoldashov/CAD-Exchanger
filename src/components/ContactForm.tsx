@@ -6,25 +6,34 @@ import { useFormik, type FormikProps, type FormikValues } from "formik";
 import type { FormProps } from "antd/es/form";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import type { WebTarget } from "styled-components";
 
-interface FormikAntdFormProps<T extends FormikValues> extends FormProps {
+const { TextArea } = Input;
+
+interface FormikAntdFormProps<T extends FormikValues>
+  extends Omit<FormProps<T>, "onFinish" | "onValuesChange"> {
   formik: FormikProps<T>;
   children: ReactNode;
 }
-const { TextArea } = Input;
 
 const FormikAntdForm = <T extends FormikValues>({
   formik,
   children,
   ...props
 }: FormikAntdFormProps<T>) => {
+  const handleValuesChange = (changedValues: Partial<T>, allValues: T) => {
+    console.log(changedValues);
+
+    formik.setValues(allValues);
+  };
+
   return (
-    <CustomForm
+    <CustomForm<void | WebTarget>
       {...props}
-      onFinish={formik.handleSubmit}
-      onValuesChange={(_, values) => {
-        formik.setValues(values);
-      }}
+      onFinish={() => formik.handleSubmit()}
+      onValuesChange={
+        handleValuesChange as (changedValues: Partial<T>, values: T) => void
+      }
       onFieldsChange={() => {
         formik.setTouched({
           ...formik.touched,
